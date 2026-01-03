@@ -8,6 +8,15 @@ WORKDIR /app
 # 安装必要的构建工具
 RUN apk add --no-cache git
 
+# 设置 Go 代理（支持构建参数覆盖）
+ARG GOPROXY=https://goproxy.cn,direct
+ARG GOSUMDB=sum.golang.google.cn
+ARG GOPRIVATE=
+
+ENV GOPROXY=${GOPROXY}
+ENV GOSUMDB=${GOSUMDB}
+ENV GOPRIVATE=${GOPRIVATE}
+
 # 复制 go mod 文件
 COPY go.mod go.sum ./
 
