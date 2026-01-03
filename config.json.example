@@ -1,0 +1,27 @@
+{
+    //示例json配置 真实配置不便上传
+  "server": {
+    "port": "8080",
+    "mode": "release"
+  },
+  "database": {
+    "type": "mysql",
+    "host": "localhost",
+    "port": "3306",
+    "user": "root",
+    "password": "your-password",
+    "dbname": "db_sync"
+  },
+  "jwt": {
+    "secret": "your-secret-key-change-in-production",
+    "expire_time": 24
+  },
+  "email": {
+    "host": "smtp.example.com",
+    "port": 465,
+    "username": "your-email@example.com",
+    "password": "your-email-password",
+    "from": "your-email@example.com"
+  }
+}
+

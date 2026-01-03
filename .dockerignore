@@ -1,0 +1,59 @@
+# Git 相关
+.git
+.gitignore
+.gitattributes
+
+# 文档
+*.md
+docs/
+API_DOCUMENTATION.md
+README.md
+prompt.md
+
+# 构建产物
+db-sync
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 测试文件
+*_test.go
+test/
+tests/
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# Docker 相关
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# 其他
+.DS_Store
+Thumbs.db
+
