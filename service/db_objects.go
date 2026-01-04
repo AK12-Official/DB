@@ -49,7 +49,7 @@ func (s *DatabaseObjectService) syncObjectsByType(sourceDB, targetDB *sql.DB, so
 	// 同步每个对象
 	for _, sourceObj := range sourceObjects {
 		objNameLower := strings.ToLower(sourceObj.Name)
-		
+
 		// 获取对象定义
 		definition, err := s.getObjectDefinition(sourceDB, sourceConn.Type, sourceConn.Database, objType, sourceObj.Name, sourceObj.TableName)
 		if err != nil {
@@ -352,7 +352,6 @@ func (s *DatabaseObjectService) convertDefinition(definition, sourceType, target
 
 	converted := definition
 
-	// 基础的语法转换示例
 	if sourceType == "mysql" && targetType == "postgres" {
 		// MySQL到PostgreSQL的转换
 		converted = strings.ReplaceAll(converted, "`", `"`)
@@ -391,4 +390,3 @@ func quoteIdentifier(name, dbType string) string {
 		return name
 	}
 }
-
