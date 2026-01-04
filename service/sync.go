@@ -62,26 +62,41 @@ func (s *SyncService) SyncTable(task *models.SyncTask) error {
 
 // syncDatabase 同步整个数据库
 func (s *SyncService) syncDatabase(sourceDB, targetDB *sql.DB, sourceConn, targetConn *models.DatabaseConnection, task *models.SyncTask) error {
-	// 1. 同步数据库对象（存储过程、触发器、视图、函数等）
-	objectService := &DatabaseObjectService{}
-	if err := objectService.SyncDatabaseObjects(sourceDB, targetDB, sourceConn, targetConn, task); err != nil {
-		s.logError(task.ID, fmt.Sprintf("同步数据库对象失败: %v", err))
-		// 继续执行表同步，不因对象同步失败而终止
-	}
-
-	// 2. 获取源数据库所有表
+	// 1. 获取源数据库所有表
 	tables, err := s.getTables(sourceDB, sourceConn.Type)
 	if err != nil {
 		return err
 	}
 
-	// 3. 同步每个表
+	// 2. 先同步所有表的结构和数据（数据库对象依赖表，必须先创建表）
 	for _, tableName := range tables {
 		task.TableName = tableName
 		if err := s.syncSingleTable(sourceDB, targetDB, sourceConn, targetConn, task); err != nil {
 			s.logError(task.ID, fmt.Sprintf("同步表 %s 失败: %v", tableName, err))
 			continue
 		}
+	}
+
+	// 3. 表同步完成后，再同步数据库对象（存储过程、触发器、视图、函数等）
+	// 注意：对象同步顺序很重要，应该按依赖关系：视图 → 存储过程/函数 → 触发器
+	objectService := &DatabaseObjectService{}
+	
+	// 先同步视图（可能依赖表，但不依赖其他对象）
+	if err := objectService.SyncObjectsByType(sourceDB, targetDB, sourceConn, targetConn, task, "view"); err != nil {
+		s.logError(task.ID, fmt.Sprintf("同步视图失败: %v", err))
+	}
+	
+	// 再同步存储过程和函数（可能引用表，但不依赖触发器）
+	if err := objectService.SyncObjectsByType(sourceDB, targetDB, sourceConn, targetConn, task, "procedure"); err != nil {
+		s.logError(task.ID, fmt.Sprintf("同步存储过程失败: %v", err))
+	}
+	if err := objectService.SyncObjectsByType(sourceDB, targetDB, sourceConn, targetConn, task, "function"); err != nil {
+		s.logError(task.ID, fmt.Sprintf("同步函数失败: %v", err))
+	}
+	
+	// 最后同步触发器（依赖表，必须最后同步）
+	if err := objectService.SyncObjectsByType(sourceDB, targetDB, sourceConn, targetConn, task, "trigger"); err != nil {
+		s.logError(task.ID, fmt.Sprintf("同步触发器失败: %v", err))
 	}
 
 	return nil

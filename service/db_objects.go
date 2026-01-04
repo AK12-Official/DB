@@ -26,7 +26,12 @@ func (s *DatabaseObjectService) SyncDatabaseObjects(sourceDB, targetDB *sql.DB, 
 	return nil
 }
 
-// syncObjectsByType 按类型同步数据库对象
+// SyncObjectsByType 按类型同步数据库对象（公开方法，供外部调用）
+func (s *DatabaseObjectService) SyncObjectsByType(sourceDB, targetDB *sql.DB, sourceConn, targetConn *models.DatabaseConnection, task *models.SyncTask, objType string) error {
+	return s.syncObjectsByType(sourceDB, targetDB, sourceConn, targetConn, task, objType)
+}
+
+// syncObjectsByType 按类型同步数据库对象（内部实现）
 func (s *DatabaseObjectService) syncObjectsByType(sourceDB, targetDB *sql.DB, sourceConn, targetConn *models.DatabaseConnection, task *models.SyncTask, objType string) error {
 	// 获取源数据库对象列表
 	sourceObjects, err := s.getObjects(sourceDB, sourceConn.Type, sourceConn.Database, objType)
